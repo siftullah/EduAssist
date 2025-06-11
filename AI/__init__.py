@@ -1,3 +1,0 @@
-"""
-Educational Platform Backend API
-""" 
