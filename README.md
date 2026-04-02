@@ -12,33 +12,36 @@ The platform consists of two main parts:
 │&nbsp;&nbsp;&nbsp;&nbsp;├── database/ # Database operations and models (e.g., for conversation history)\
 │&nbsp;&nbsp;&nbsp;&nbsp;├── schemas/ # Pydantic models and request/response schemas\
 │&nbsp;&nbsp;&nbsp;&nbsp;├── services/ # Business logic and AI services (LangChain, OpenAI interactions)\
-│&nbsp;&nbsp;&nbsp;&nbsp;├── utils/ # Utility functions\
+│&nbsp;&nbsp;&nbsp;&nbsp;├── utils/ # Utility functions and prompt templates\
 │&nbsp;&nbsp;&nbsp;&nbsp;├── main.py # FastAPI application entry point\
 │&nbsp;&nbsp;&nbsp;&nbsp;└── config.py # Configuration settings\
 │\
 ├── Web/ # Full-stack Next.js application\
 │&nbsp;&nbsp;&nbsp;&nbsp;├── app/ # Next.js app directory (using App Router)\
-│&nbsp;&nbsp;&nbsp;&nbsp;├── api/ # API routes / Server Actions for backend logic\
-│&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;├── administration/ # Admin API endpoints\
-│&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;├── faculty/ # Faculty API endpoints\
-│&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;├── student/ # Student API endpoints\
-│&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;├── notifications/ # Notification system logic\
-│&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;└── ... # Other backend logic\
-│&nbsp;&nbsp;&nbsp;&nbsp;├── (auth)/ # Authentication pages (Clerk integration)\
-│&nbsp;&nbsp;&nbsp;&nbsp;├── (dashboard)/ # User dashboards (role-specific)\
-│&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;├── admin/ # Admin dashboard pages\
-│&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;├── faculty/ # Faculty dashboard pages\
-│&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;└── student/ # Student dashboard pages\
-│&nbsp;&nbsp;&nbsp;&nbsp;├── (main)/ # Core application pages (classrooms, forums, etc.)\
-│&nbsp;&nbsp;&nbsp;&nbsp;└── ... # Other feature pages\
-│\
-├── components/ # Reusable UI components (using Shadcn UI)\
-├── hooks/ # Custom React hooks\
-├── lib/ # Utility functions, Prisma client, etc.\
-├── prisma/ # Database schema (schema.prisma) and migrations\
-├── public/ # Static assets\
-├── styles/ # Global styles, Tailwind CSS config\
-└── types/ # TypeScript type definitions\
+│&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;├── api/ # API routes / Server Actions for backend logic\
+│&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;├── administration/ # Admin API endpoints\
+│&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;├── faculty/ # Faculty API endpoints\
+│&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;├── student/ # Student API endpoints\
+│&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;└── ... # Other backend logic (onboarding, posts, reminders)\
+│&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;├── (auth)/ # Authentication pages (Clerk integration)\
+│&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;├── sign-in/ # Sign in page\
+│&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;├── sign-up/ # Sign up page\
+│&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;└── forgot-password/ # Password recovery\
+│&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;├── (dashboard)/ # User dashboards (role-specific)\
+│&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;├── administration/ # Admin dashboard pages\
+│&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;├── faculty/ # Faculty dashboard pages\
+│&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;└── student/ # Student dashboard pages\
+│&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;├── (main)/ # Core application pages\
+│&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;├── (index)/ # Landing page\
+│&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;└── onboarding/ # University onboarding flow\
+│&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;└── dashboard/ # Dashboard redirect (routes by role)\
+│&nbsp;&nbsp;&nbsp;&nbsp;├── components/ # Reusable UI components (using Shadcn UI)\
+│&nbsp;&nbsp;&nbsp;&nbsp;├── hooks/ # Custom React hooks\
+│&nbsp;&nbsp;&nbsp;&nbsp;├── lib/ # Utility functions, Prisma client, etc.\
+│&nbsp;&nbsp;&nbsp;&nbsp;├── prisma/ # Database schema (schema.prisma) and migrations\
+│&nbsp;&nbsp;&nbsp;&nbsp;├── public/ # Static assets\
+│&nbsp;&nbsp;&nbsp;&nbsp;├── styles/ # Global styles, Tailwind CSS config\
+│&nbsp;&nbsp;&nbsp;&nbsp;└── types/ # TypeScript type definitions\
 
 ## Features
 
@@ -124,23 +127,24 @@ The platform consists of two main parts:
 
 ## Database Schema
 
-The application utilizes a relational database (PostgreSQL) managed via Prisma. Key models include (referencing the ERD):
+The application utilizes a relational database (PostgreSQL) managed via Prisma. Key models include:
 -   University
 -   User (handles Student, Faculty, Admin roles via `type`)
--   UniAdministration (linking users to admin roles/permissions)
--   Department
--   Batch
+-   Student / Faculty (role-specific profile details)
+-   UniAdministration / UniAdministrationRoles / Permission (admin roles and permissions)
+-   Department / Batch / DepartmentBatches
 -   Course
 -   Classroom
 -   ClassroomTeachers (linking faculty/TAs to classrooms)
 -   Enrollment (linking students to classrooms)
--   Forum
--   ForumMembers
--   Thread (for both Forum and Classroom discussions, potentially private chats)
--   Post (replies within threads)
--   Classwork (Assignments)
--   Submission (Student submissions for Classwork)
--   *Note: This is a conceptual list based on the ERD. Refer to `prisma/schema.prisma` for the exact schema.*
+-   Assignment (classwork with due dates)
+-   Submission / SubmissionAttachments (student submissions with marks)
+-   Forum (standalone discussion forums)
+-   Thread / ThreadPost / ThreadPostAttachments (forum discussions and replies)
+-   ClassroomThread / ClassroomPost / ClassroomPostAttachments (classroom-specific discussions)
+-   Group / BatchGroup / DepartmentGroup / CustomGroup / CustomGroupMembers (user groups)
+-   Reminder (user reminders with due dates)
+-   *Refer to `Web/prisma/schema.prisma` for the exact schema.*
 
 ## Backend Architecture
 
@@ -168,7 +172,6 @@ The overall architecture follows a layered approach:
 -   Git
 -   Clerk Account (Publishable Key, Secret Key)
 -   OpenAI API Key
--   Chroma API Key & Environment details
 
 ### AI Backend Setup (FastAPI)
 
@@ -188,7 +191,7 @@ The overall architecture follows a layered approach:
 4.  Set up environment variables:
     ```bash
     cp .env.example .env
-    # Edit .env with your OpenAI API Key, Chroma details, etc.
+    # Edit .env with your OpenAI API Key
     ```
 5.  Run the AI backend server:
     ```bash
@@ -233,8 +236,6 @@ The overall architecture follows a layered approach:
 ### AI Backend (`AI/.env`)
 ```dotenv
 OPENAI_API_KEY=your_openai_api_key
-Chroma_API_KEY=your_Chroma_api_key
-Chroma_ENVIRONMENT=your_Chroma_environment
 ```
 
 ### Web Application (`Web/.env`)
